@@ -15,12 +15,28 @@ class Program
         {
             var rows = LoadCsv(csvFile);
             var header = rows[0];
-            //DisplayHeaders(header);
-            //DisplayValues(rows);
 
             var parameterNames = CreateParameterNames(header);
 
             List<string> columns = CreateColumns(header);
+
+            using (var connection = new SqliteConnection($"Data Source={DBName}"))
+            {
+
+                connection.Open();
+
+                // Drop existing table (optional)
+                //DropTable(TableName, connection);
+
+                // creating a basic table
+                CreateTable(TableName, connection, columns);
+
+                //InsertRow(TableName, connection, values, parameterNames, headers);
+
+                //using SqliteCommand selectCommand = SelectData(TableName, connection);
+                //using SqliteDataReader reader = ReadData(selectCommand, headers);
+
+            }
 
         }
         catch (FileNotFoundException ex)
@@ -92,5 +108,15 @@ class Program
             parameterNames.Add("@" + columnName);
         }
         return parameterNames;
+    }
+
+    private static void CreateTable(string TableName, SqliteConnection connection, List<String> columns)
+    {
+
+        using (var createCommand = connection.CreateCommand())
+        {
+            createCommand.CommandText = $"CREATE TABLE {TableName} ({string.Join(", ", columns)});";
+            createCommand.ExecuteNonQuery();
+        }
     }
 }
