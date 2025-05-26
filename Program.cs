@@ -9,10 +9,8 @@ class Program
         try
         {
             var (headers, rows) = LoadCsv(csvFile);
-            foreach (var header in headers)
-            {
-                Console.WriteLine($"{header}");
-            }
+            DisplayHeaders(headers);
+
         }
         catch (FileNotFoundException ex)
         {
@@ -43,5 +41,13 @@ class Program
 
         }
         return (headers, rows);
+    }
+
+    private static void DisplayHeaders(string[] headers)
+    {
+        foreach (var header in headers)
+        {
+            Console.WriteLine($"{header}");
+        }
     }
 }
