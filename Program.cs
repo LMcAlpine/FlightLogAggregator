@@ -115,7 +115,7 @@ class Program
 
         using (var createCommand = connection.CreateCommand())
         {
-            createCommand.CommandText = $"CREATE TABLE {TableName} ({string.Join(", ", columns)});";
+            createCommand.CommandText = $"CREATE TABLE IF NOT EXISTS {TableName} ({string.Join(", ", columns)});";
             createCommand.ExecuteNonQuery();
         }
     }
