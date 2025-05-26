@@ -18,11 +18,7 @@ class Program
             //DisplayHeaders(header);
             //DisplayValues(rows);
 
-            var parameterNames = new List<string>();
-            foreach (var columnName in header)
-            {
-                parameterNames.Add("@" + columnName);
-            }
+            var parameterNames = CreateParameterNames(header);
 
             List<string> columns = CreateColumns(header);
 
@@ -85,5 +81,16 @@ class Program
         }
 
         return columns;
+    }
+
+    private static List<string> CreateParameterNames(string[] header)
+    {
+
+        var parameterNames = new List<string>();
+        foreach (var columnName in header)
+        {
+            parameterNames.Add("@" + columnName);
+        }
+        return parameterNames;
     }
 }
