@@ -25,7 +25,7 @@ class Program
 
                 connection.Open();
 
-                // Drop existing table (optional)
+                // Drop existing table
                 //DropTable(TableName, connection);
 
                 // creating a basic table
