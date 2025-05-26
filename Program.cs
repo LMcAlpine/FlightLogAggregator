@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using System.Data;
+using Microsoft.Data.Sqlite;
 using Microsoft.VisualBasic.FileIO;
 
 class Program
@@ -31,7 +32,7 @@ class Program
                 // creating a basic table
                 CreateTable(TableName, connection, columns);
 
-                //InsertRow(TableName, connection, values, parameterNames, headers);
+                InsertRow(TableName, connection, parameterNames, rows);
 
                 //using SqliteCommand selectCommand = SelectData(TableName, connection);
                 //using SqliteDataReader reader = ReadData(selectCommand, headers);
@@ -110,6 +111,8 @@ class Program
         return parameterNames;
     }
 
+
+
     private static void CreateTable(string TableName, SqliteConnection connection, List<String> columns)
     {
 
@@ -119,4 +122,41 @@ class Program
             createCommand.ExecuteNonQuery();
         }
     }
+
+    private static void InsertRow(string TableName, SqliteConnection connection, List<string> parameterNames, List<string[]> rows)
+    {
+        using (var insertCommand = connection.CreateCommand())
+        {
+
+            using var transaction = connection.BeginTransaction();
+            insertCommand.Transaction = transaction;
+
+
+            // set empty parameters.
+            // need to add the parameters and then the values later...
+            var header = rows[0];
+            foreach (var columnName in header)
+            {
+                insertCommand.Parameters.Add(new SqliteParameter("@" + columnName, DbType.String));
+            }
+
+            insertCommand.CommandText = $"INSERT INTO {TableName} ({string.Join(", ", header)}) VALUES ({string.Join(", ", parameterNames)});";
+
+            insertCommand.Prepare();
+            for (int i = 1; i < rows.Count(); i++)
+            {
+                for (int j = 0; j < rows[i].Length; j++)
+                {
+                    var value = rows[i][j];
+                    insertCommand.Parameters[j].Value = value;
+                }
+                insertCommand.ExecuteNonQuery();
+
+            }
+            transaction.Commit();
+
+        }
+
+    }
 }
+
