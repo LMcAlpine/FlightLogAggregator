@@ -7,11 +7,25 @@ class Program
     {
         const string csvFile = "T_ONTIME_REPORTING.csv";
 
+        const string TableName = "OnTimeFlightPerformance";
+        const string DBName = "FlightStatistics.db";
+
+
         try
         {
             var rows = LoadCsv(csvFile);
-            DisplayHeaders(rows[0]);
-            DisplayValues(rows);
+            var header = rows[0];
+            //DisplayHeaders(header);
+            //DisplayValues(rows);
+
+            var parameterNames = new List<string>();
+            foreach (var columnName in header)
+            {
+                parameterNames.Add("@" + columnName);
+            }
+
+            List<string> columns = CreateColumns(header);
+
         }
         catch (FileNotFoundException ex)
         {
@@ -60,5 +74,16 @@ class Program
             }
 
         }
+    }
+
+    private static List<string> CreateColumns(string[] header)
+    {
+        var columns = new List<string>();
+        foreach (var col in header)
+        {
+            columns.Add($"[{col}] TEXT");
+        }
+
+        return columns;
     }
 }
