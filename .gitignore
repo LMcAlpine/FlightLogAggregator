@@ -364,3 +364,4 @@ FodyWeavers.xsd
 
 # CSV data
 *.csv
+/.~lock.test.csv#
