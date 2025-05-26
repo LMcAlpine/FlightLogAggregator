@@ -4,16 +4,31 @@ class Program
 {
     public static void Main(string[] args)
     {
-        const string CSVFile = "T_ONTIME_REPORTING.csv";
-        if (!File.Exists(CSVFile))
+        const string csvFile = "T_ONTIME_REPORTING.csv";
+
+        try
         {
-            Console.WriteLine($"CSV file '{CSVFile}' not found.");
-            return;
+            var (headers, rows) = LoadCsv(csvFile);
+            DisplayHeaders(headers);
+
+        }
+        catch (FileNotFoundException ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+        }
+
+    }
+
+    private static (string[] headers, List<string[]> rows) LoadCsv(string csvFile)
+    {
+        if (!File.Exists(csvFile))
+        {
+            throw new FileNotFoundException($"CSV file '{csvFile}' not found.");
         }
 
         string[] headers;
-        var values = new List<string[]>();
-        using (var reader = new StreamReader(CSVFile))
+        var rows = new List<string[]>();
+        using (var reader = new StreamReader(csvFile))
         {
             var headerLine = reader.ReadLine()!;
             headers = headerLine.Split(",", StringSplitOptions.RemoveEmptyEntries);
@@ -21,15 +36,18 @@ class Program
             string? line;
             while ((line = reader.ReadLine()) != null)
             {
-                values.Add(line.Split(",", StringSplitOptions.None));
+                rows.Add(line.Split(",", StringSplitOptions.None));
             }
 
         }
+        return (headers, rows);
+    }
+
+    private static void DisplayHeaders(string[] headers)
+    {
         foreach (var header in headers)
         {
             Console.WriteLine($"{header}");
         }
-
-
     }
 }
