@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
+using Microsoft.VisualBasic.FileIO;
 
 class Program
 {
@@ -8,9 +9,9 @@ class Program
 
         try
         {
-            var (headers, rows) = LoadCsv(csvFile);
-            DisplayHeaders(headers);
-
+            var rows = LoadCsv(csvFile);
+            DisplayHeaders(rows[0]);
+            DisplayValues(rows);
         }
         catch (FileNotFoundException ex)
         {
@@ -19,28 +20,26 @@ class Program
 
     }
 
-    private static (string[] headers, List<string[]> rows) LoadCsv(string csvFile)
+    private static List<string[]> LoadCsv(string csvFile)
     {
         if (!File.Exists(csvFile))
         {
             throw new FileNotFoundException($"CSV file '{csvFile}' not found.");
         }
 
-        string[] headers;
+
         var rows = new List<string[]>();
-        using (var reader = new StreamReader(csvFile))
+        using var parser = new TextFieldParser(csvFile);
+        parser.TextFieldType = FieldType.Delimited;
+        parser.SetDelimiters(",");
+
+        while (!parser.EndOfData)
         {
-            var headerLine = reader.ReadLine()!;
-            headers = headerLine.Split(",", StringSplitOptions.RemoveEmptyEntries);
-
-            string? line;
-            while ((line = reader.ReadLine()) != null)
-            {
-                rows.Add(line.Split(",", StringSplitOptions.None));
-            }
-
+            rows.Add(parser.ReadFields()!);
         }
-        return (headers, rows);
+
+
+        return rows;
     }
 
     private static void DisplayHeaders(string[] headers)
@@ -48,6 +47,18 @@ class Program
         foreach (var header in headers)
         {
             Console.WriteLine($"{header}");
+        }
+    }
+
+    private static void DisplayValues(List<string[]> rows)
+    {
+        for (int i = 1; i < rows.Count(); i++)
+        {
+            foreach (var column in rows[i])
+            {
+                Console.WriteLine(column);
+            }
+
         }
     }
 }
