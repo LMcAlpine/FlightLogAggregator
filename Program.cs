@@ -27,15 +27,15 @@ class Program
                 connection.Open();
 
                 // Drop existing table
-                //DropTable(TableName, connection);
+                DropTable(TableName, connection);
 
                 // creating a basic table
                 CreateTable(TableName, connection, columns);
 
                 InsertRow(TableName, connection, parameterNames, rows);
 
-                //using SqliteCommand selectCommand = SelectData(TableName, connection);
-                //using SqliteDataReader reader = ReadData(selectCommand, headers);
+                using SqliteCommand selectCommand = SelectData(TableName, connection);
+                ReadData(selectCommand, header);
 
             }
 
@@ -110,7 +110,14 @@ class Program
         }
         return parameterNames;
     }
-
+    private static void DropTable(string TableName, SqliteConnection connection)
+    {
+        using (var cmd = connection.CreateCommand())
+        {
+            cmd.CommandText = $"DROP TABLE IF EXISTS {TableName};";
+            cmd.ExecuteNonQuery();
+        }
+    }
 
 
     private static void CreateTable(string TableName, SqliteConnection connection, List<String> columns)
@@ -158,5 +165,33 @@ class Program
         }
 
     }
+
+    private static SqliteCommand SelectData(string TableName, SqliteConnection connection)
+    {
+        var selectCommand = connection.CreateCommand();
+        selectCommand.CommandText = $"SELECT TAIL_NUM, COUNT(*) AS FlightCount FROM {TableName} GROUP BY TAIL_NUM;";
+        return selectCommand;
+    }
+
+    private static void ReadData(SqliteCommand selectCommand, string[] headers)
+    {
+        var reader = selectCommand.ExecuteReader();
+        while (reader.Read())
+        {
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                string columnName = reader.GetName(i);
+                object columnValue = reader.GetValue(i);
+                Console.WriteLine($"{columnName}: {columnValue}");
+            }
+            Console.WriteLine();
+        }
+
+    }
+
+
 }
+
+
+
 
